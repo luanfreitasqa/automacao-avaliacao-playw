@@ -1,8 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
+import { defineBddConfig } from 'playwright-bdd';
+
+const bddTestDir = defineBddConfig({
+  features: 'features/**/*.feature',
+  steps: ['steps/**/*.ts'],
+  outputDir: '.features-gen',
+});
 
 export default defineConfig({
-  testDir: './tests',
-
   fullyParallel: true,
 
   forbidOnly: !!process.env.CI,
@@ -14,14 +19,34 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: 'https://jsonplaceholder.typicode.com',
     trace: 'on-first-retry',
   },
 
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'api',
+      testDir: './tests/api',
+      use: {
+        baseURL: 'https://jsonplaceholder.typicode.com',
+      },
+    },
+
+    {
+      name: 'e2e',
+      testDir: './tests/e2e',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'https://www.saucedemo.com',
+      },
+    },
+
+    {
+      name: 'bdd',
+      testDir: bddTestDir,
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'https://www.saucedemo.com',
+      },
     },
   ],
 });

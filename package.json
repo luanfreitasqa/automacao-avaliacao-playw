@@ -3,17 +3,21 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "commonjs",
+  "license": "ISC",
+  "scripts": {
+    "bddgen": "bddgen",
+    "test": "npm run bddgen && playwright test",
+    "test:api": "playwright test --project=api",
+    "test:e2e": "playwright test --project=e2e",
+    "test:bdd": "npm run bddgen && playwright test --project=bdd"
+  },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
-    "@types/node": "^26.1.0"
+    "@types/node": "^26.1.0",
+    "playwright-bdd": "^9.2.0"
   },
   "dependencies": {
-    "@cucumber/cucumber": "^13.0.0",
-    "playwright-bdd": "^9.2.0"
+    "@cucumber/cucumber": "^13.0.0"
   }
 }

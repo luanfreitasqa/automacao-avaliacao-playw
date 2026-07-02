@@ -1,36 +1,55 @@
-import { Given, When, Then } from '@cucumber/cucumber';
-import { chromium, Browser, Page } from '@playwright/test';
+import { createBdd } from 'playwright-bdd';
 import { LoginPage } from '../pages/LoginPage';
-import credentials from '../fixtures/e2e/login.json';
+import { ProductsPage } from '../pages/ProductsPage';
 
-let browser: Browser;
-let page: Page;
+const { Given, When, Then } = createBdd();
+
 let loginPage: LoginPage;
+let productsPage: ProductsPage | undefined;
 
-Given('que o usuário acessa a página de login', async () => {
-  browser = await chromium.launch();
+let usuario = '';
+let senha = '';
 
-  page = await browser.newPage();
-
+Given('que o usuário acessa a página de login', async ({ page }) => {
   loginPage = new LoginPage(page);
-
   await loginPage.acessar();
 });
 
-When('informa usuário e senha válidos', async () => {
-  await loginPage.login(
-    credentials.username,
-    credentials.password
-  );
+When('informa o usuário {string}', async ({}, user: string) => {
+  usuario = user;
 });
 
-Then('deve visualizar a página de produtos', async () => {
-  const productsPage = await loginPage.login(
-    credentials.username,
-    credentials.password
-  );
+When('informa a senha {string}', async ({}, pass: string) => {
+  senha = pass;
 
-  await productsPage.validateProductsPage();
-
-  await browser.close();
+  productsPage = await loginPage.login(usuario, senha);
 });
+
+Then('o resultado deve ser {string}', async ({}, resultado: string) => {
+  if (resultado === 'sucesso') {
+    await productsPage!.validateProductsPage();
+  } else {
+    await loginPage.validarMensagemErro(
+      await getMensagemEsperada(usuario, senha)
+    );
+  }
+});
+
+async function getMensagemEsperada(
+  usuario: string,
+  senha: string
+): Promise<string> {
+  if (!usuario) {
+    return 'Epic sadface: Username is required';
+  }
+
+  if (!senha) {
+    return 'Epic sadface: Password is required';
+  }
+
+  if (usuario === 'locked_out_user') {
+    return 'Epic sadface: Sorry, this user has been locked out.';
+  }
+
+  return 'Epic sadface: Username and password do not match any user in this service';
+}
