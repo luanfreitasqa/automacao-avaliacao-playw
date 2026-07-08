@@ -1,5 +1,4 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { ProductsPage } from './ProductsPage';
 
 export class LoginPage {
   private readonly usernameInput: Locator;
@@ -15,26 +14,21 @@ export class LoginPage {
   }
 
   async acessar(): Promise<void> {
-    await this.page.goto('https://www.saucedemo.com/');
+    await this.page.goto('/');
   }
 
-  async login(usuario: string, senha: string): Promise<ProductsPage> {
+  /**
+   * Preenche usuário/senha e clica em entrar.
+   * Não retorna ProductsPage: quem chamar decide o que validar
+   * (sucesso -> instanciar ProductsPage; erro -> validarMensagemErro).
+   */
+  async login(usuario: string, senha: string): Promise<void> {
     await this.usernameInput.fill(usuario);
     await this.passwordInput.fill(senha);
     await this.loginButton.click();
-
-    return new ProductsPage(this.page);
   }
 
-  async tentarLogin(usuario: string, senha: string): Promise<void> {
-    await this.usernameInput.fill(usuario);
-    await this.passwordInput.fill(senha);
-    await this.loginButton.click();
-  }
-
-  async validarMensagemErro(
-    mensagem: string
-  ): Promise<void> {
+  async validarMensagemErro(mensagem: string): Promise<void> {
     await expect(this.errorMessage).toHaveText(mensagem);
   }
 }

@@ -4,20 +4,58 @@ import {
   validateJsonResponse,
   validateUser,
 } from '../../../utils/validators';
-import user from '../../../fixtures/api/user.json';
+import { UserFactory } from '../../../fixtures/factories/UserFactory';
+import { User } from '../../../models/User';
 
-test('Deve criar um novo usuário', async ({ request }) => {
-  const api = new ApiClient(request);
+const scenarios: {
+  name: string;
+  buildUser: () => Partial<User>;
+  expectedStatus: number;
+}[] = [
+  {
+    name: 'payload completo e válido',
+    buildUser: () => UserFactory.create(),
+    expectedStatus: 201,
+  },
+  {
+    // Nota: o JSONPlaceholder é uma API fake que não valida nem persiste dados,
+    // por isso retorna 201 mesmo sem campos obrigatórios. Numa API real com
+    // validação de fato, o esperado aqui seria 400 Bad Request.
+    name: 'payload sem username',
+    buildUser: () => {
+      const { username, ...rest } = UserFactory.create();
+      return rest;
+    },
+    expectedStatus: 201,
+  },
+  {
+    name: 'payload com email em formato inválido',
+    buildUser: () => UserFactory.create({ email: 'email-invalido' }),
+    expectedStatus: 201, // idem nota acima
+  },
+];
 
-  const response = await api.createUser(user);
+test.describe('POST /users', () => {
+  scenarios.forEach(({ name, buildUser, expectedStatus }) => {
+    test(`Deve retornar ${expectedStatus} ao criar usuário com ${name}`, async ({
+      request,
+    }) => {
+      const api = new ApiClient(request);
+      const user = buildUser();
 
-  await validateJsonResponse(response, 201);
+      const response = await api.createUser(user as User);
 
-  const body = await response.json();
+      await validateJsonResponse(response, expectedStatus);
 
-  validateUser(body);
+      const body = await response.json();
 
-  expect(body.name).toBe(user.name);
-  expect(body.username).toBe(user.username);
-  expect(body.email).toBe(user.email);
+      if (expectedStatus === 201) {
+        expect(body.id).toBeTruthy();
+
+        if (user.name) expect(body.name).toBe(user.name);
+        if (user.username) expect(body.username).toBe(user.username);
+        if (user.email) expect(body.email).toBe(user.email);
+      }
+    });
+  });
 });

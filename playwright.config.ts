@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
+import { env } from './config/env';
 
 const bddTestDir = defineBddConfig({
   features: 'features/**/*.feature',
@@ -27,16 +28,7 @@ export default defineConfig({
       name: 'api',
       testDir: './tests/api',
       use: {
-        baseURL: 'https://jsonplaceholder.typicode.com',
-      },
-    },
-
-    {
-      name: 'e2e',
-      testDir: './tests/e2e',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: 'https://www.saucedemo.com',
+        baseURL: env.apiUrl,
       },
     },
 
@@ -45,7 +37,7 @@ export default defineConfig({
       testDir: bddTestDir,
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'https://www.saucedemo.com',
+        baseURL: env.baseUrl,
       },
     },
   ],

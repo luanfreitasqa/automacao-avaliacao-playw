@@ -5,7 +5,6 @@ import { ProductsPage } from '../pages/ProductsPage';
 const { Given, When, Then } = createBdd();
 
 let loginPage: LoginPage;
-let productsPage: ProductsPage | undefined;
 
 let usuario = '';
 let senha = '';
@@ -22,23 +21,21 @@ When('informa o usuário {string}', async ({}, user: string) => {
 When('informa a senha {string}', async ({}, pass: string) => {
   senha = pass;
 
-  productsPage = await loginPage.login(usuario, senha);
+  await loginPage.login(usuario, senha);
 });
 
-Then('o resultado deve ser {string}', async ({}, resultado: string) => {
+Then('o resultado deve ser {string}', async ({ page }, resultado: string) => {
   if (resultado === 'sucesso') {
-    await productsPage!.validateProductsPage();
+    const productsPage = new ProductsPage(page);
+    await productsPage.validateProductsPage();
   } else {
     await loginPage.validarMensagemErro(
-      await getMensagemEsperada(usuario, senha)
+      getMensagemEsperada(usuario, senha)
     );
   }
 });
 
-async function getMensagemEsperada(
-  usuario: string,
-  senha: string
-): Promise<string> {
+function getMensagemEsperada(usuario: string, senha: string): string {
   if (!usuario) {
     return 'Epic sadface: Username is required';
   }

@@ -1,4 +1,7 @@
 Feature: Login
+  # Todos os cenários de UI (fluxo de negócio e casos de borda) ficam aqui,
+  # em BDD. Não existe suíte paralela de e2e "sem BDD" para login -
+  # evita ter dois lugares diferentes cobrindo a mesma tela.
 
   Scenario Outline: Tentativa de login
     Given que o usuário acessa a página de login
@@ -9,7 +12,7 @@ Feature: Login
     Examples:
       | usuario         | senha         | resultado |
       | standard_user   | secret_sauce  | sucesso   |
-      | standard_user   | senha_errada  | erro      |
       | locked_out_user | secret_sauce  | erro      |
-      |                 | secret_sauce  | erro      |
+      | standard_user   | senha_errada  | erro      |
       | standard_user   |               | erro      |
+      |                 | secret_sauce  | erro      |

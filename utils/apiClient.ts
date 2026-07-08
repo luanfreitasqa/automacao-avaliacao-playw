@@ -4,7 +4,7 @@ import { User } from '../models/User';
 export class ApiClient {
   constructor(private request: APIRequestContext) { }
 
-  async getUser(id: number): Promise<APIResponse> {
+  async getUser(id: number | string): Promise<APIResponse> {
     return this.request.get(`/users/${id}`);
   }
 
